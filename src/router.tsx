@@ -1,8 +1,7 @@
-import { createRootRoute, createRoute, createRouter, Outlet } from '@tanstack/react-router'
+import { createRootRoute, createRoute, createRouter, Outlet, redirect } from '@tanstack/react-router'
 import { Layout } from './components/Layout'
-import { EditorPage } from './routes/EditorPage'
 import { ReaderPage } from './routes/ReaderPage'
-import { ViewerPage } from './routes/ViewerPage'
+import { WorkspacePage } from './routes/WorkspacePage'
 
 interface DocSearch {
   doc?: string
@@ -14,7 +13,7 @@ const validateSearch = (s: Record<string, unknown>): DocSearch => ({
 
 const rootRoute = createRootRoute({ component: Outlet })
 
-// Pathless layout route: its children get the app chrome (header + saved-docs sidebar).
+// Pathless layout route: its children get the app chrome (header + history drawer).
 // The reader route is a sibling so it can render edge to edge with no chrome.
 const appRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -22,18 +21,22 @@ const appRoute = createRoute({
   component: Layout,
 })
 
-export const viewerRoute = createRoute({
+export const workspaceRoute = createRoute({
   getParentRoute: () => appRoute,
   path: '/',
   validateSearch,
-  component: ViewerPage,
+  component: WorkspacePage,
 })
 
-export const editorRoute = createRoute({
+// The editor is now a mode of the workspace rather than its own page.
+// Kept as a redirect so existing links and bookmarks still land somewhere.
+const editorRedirectRoute = createRoute({
   getParentRoute: () => appRoute,
   path: '/editor',
   validateSearch,
-  component: EditorPage,
+  beforeLoad: ({ search }) => {
+    throw redirect({ to: '/', search, replace: true })
+  },
 })
 
 export const readerRoute = createRoute({
@@ -44,7 +47,7 @@ export const readerRoute = createRoute({
 })
 
 const routeTree = rootRoute.addChildren([
-  appRoute.addChildren([viewerRoute, editorRoute]),
+  appRoute.addChildren([workspaceRoute, editorRedirectRoute]),
   readerRoute,
 ])
 

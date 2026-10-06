@@ -27,9 +27,22 @@ body {
 }
 
 .tiptap {
-  @apply min-h-[24rem] outline-none;
+  @apply min-h-full outline-none;
 }
 .tiptap p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   @apply pointer-events-none float-left h-0 text-zinc-400;
+}
+
+/* Task list items: drop the bullet so the checkbox is the marker, and pull the row
+   back into the list's gutter the way the rendered document reads on GitHub. */
+.prose li:has(> .task-checkbox) {
+  list-style: none;
+  padding-left: 0;
+}
+.prose li > .task-checkbox {
+  @apply mr-2 -ml-6 size-4 cursor-pointer rounded align-middle accent-[var(--color-accent)];
+}
+.prose li > .task-checkbox:focus-visible {
+  @apply outline-2 outline-offset-2 outline-accent;
 }
