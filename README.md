@@ -22,6 +22,12 @@ knowing: the editor normalizes markdown on the way out (`*` bullets become `-`, 
 HTML is dropped), so editing in Editor mode can rewrite hand-authored formatting. Simply viewing a
 mode never changes anything.
 
+Task list items (`- [ ] thing`) are checkable in Markdown mode: ticking one rewrites the
+`[ ]` in the source, so the change shows up in Text and is kept by Save. The reader at
+`/read` shows them read only. A click maps back to the source through the parsed list
+item's position rather than by counting checkboxes, so a `- [ ]` inside a fenced code
+block can't send the toggle to the wrong line.
+
 Documents are saved to `localStorage` and listed in the History drawer on the left edge.
 `⛶ Full screen ↗` saves and opens the document chrome-free at `/read?doc=<id>` in a new tab.
 

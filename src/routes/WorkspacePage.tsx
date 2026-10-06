@@ -133,7 +133,7 @@ function Workspace({
         )}
         {mode === 'markdown' && (
           <div className="min-h-0 flex-1 overflow-auto py-6">
-            <MarkdownPreview markdown={markdown} />
+            <MarkdownPreview markdown={markdown} onChange={setMarkdown} />
           </div>
         )}
         {mode === 'editor' && (
