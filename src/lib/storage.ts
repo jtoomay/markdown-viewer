@@ -66,10 +66,18 @@ export const documentStore = {
   },
 }
 
-export type ThemeMode = 'light' | 'dark' | 'system'
+export type ThemeMode = 'light' | 'dark'
+
+function systemTheme(): ThemeMode {
+  return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
 
 export const settingsStore = {
-  getTheme: () => read<ThemeMode>(KEYS.theme, 'system'),
+  // First visit (or a legacy 'system' value) falls back to the OS preference once.
+  getTheme: (): ThemeMode => {
+    const stored = read<string | null>(KEYS.theme, null)
+    return stored === 'light' || stored === 'dark' ? stored : systemTheme()
+  },
   setTheme: (t: ThemeMode) => write(KEYS.theme, t),
   getAccent: () => read<string>(KEYS.accent, '#6366f1'),
   setAccent: (c: string) => write(KEYS.accent, c),

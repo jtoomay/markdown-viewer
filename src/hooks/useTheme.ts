@@ -8,10 +8,8 @@ function readableOn(hex: string): string {
 }
 
 export function applyAppearance(mode: ThemeMode, accent: string) {
-  const dark =
-    mode === 'dark' || (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
   const root = document.documentElement
-  root.classList.toggle('dark', dark)
+  root.classList.toggle('dark', mode === 'dark')
   root.style.setProperty('--accent', accent)
   root.style.setProperty('--accent-fg', readableOn(accent))
 }
@@ -22,11 +20,6 @@ export function useTheme() {
 
   useEffect(() => {
     applyAppearance(mode, accent)
-    if (mode !== 'system') return
-    const mq = matchMedia('(prefers-color-scheme: dark)')
-    const onChange = () => applyAppearance(mode, accent)
-    mq.addEventListener('change', onChange)
-    return () => mq.removeEventListener('change', onChange)
   }, [mode, accent])
 
   const setMode = useCallback((m: ThemeMode) => {

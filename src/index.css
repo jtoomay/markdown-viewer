@@ -27,7 +27,7 @@ body {
 }
 
 .tiptap {
-  @apply min-h-[24rem] outline-none;
+  @apply min-h-full outline-none;
 }
 .tiptap p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);

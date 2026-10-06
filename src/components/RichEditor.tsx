@@ -84,7 +84,9 @@ export function RichEditor({
   return (
     <>
       <Toolbar editor={editor} />
-      <EditorContent editor={editor} />
+      <div className="min-h-0 flex-1 overflow-auto">
+        <EditorContent editor={editor} className="min-h-full" />
+      </div>
     </>
   )
 }

@@ -39,8 +39,8 @@ function ViewerInner({ id, initial }: { id?: string; initial: string }) {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <section className={`${panel} flex min-h-[70vh] flex-col`}>
+    <div className="grid h-full grid-rows-2 gap-3 md:grid-cols-2 md:grid-rows-[minmax(0,1fr)]">
+      <section className={`${panel} flex min-h-0 flex-col overflow-hidden`}>
         <div className="flex items-center justify-between gap-2 border-b border-zinc-200 p-2 dark:border-zinc-800">
           <span className="px-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">Markdown</span>
           <div className="flex gap-2">
@@ -57,10 +57,10 @@ function ViewerInner({ id, initial }: { id?: string; initial: string }) {
           onChange={(e) => setSource(e.target.value)}
           spellCheck={false}
           placeholder="Paste markdown here…"
-          className="min-h-[60vh] flex-1 resize-none bg-transparent p-4 font-mono text-sm outline-none"
+          className="min-h-0 flex-1 resize-none overflow-auto bg-transparent p-4 font-mono text-sm outline-none"
         />
       </section>
-      <section className={`${panel} flex min-h-[70vh] flex-col`}>
+      <section className={`${panel} flex min-h-0 flex-col overflow-hidden`}>
         <div className="flex items-center justify-between border-b border-zinc-200 p-2 dark:border-zinc-800">
           <span className="px-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">Document</span>
           <Link
@@ -68,10 +68,10 @@ function ViewerInner({ id, initial }: { id?: string; initial: string }) {
             search={id ? { doc: id } : {}}
             className="px-2 text-xs text-accent hover:underline"
           >
-            Open in editor →
+            Create Markdown
           </Link>
         </div>
-        <div className="flex-1 overflow-auto p-6">
+        <div className="min-h-0 flex-1 overflow-auto p-6">
           <MarkdownPreview markdown={rendered} />
         </div>
       </section>

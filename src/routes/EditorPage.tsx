@@ -42,15 +42,15 @@ function EditorInner({ id, initial }: { id?: string; initial: string }) {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <section className={`${panel} flex min-h-[70vh] flex-col`}>
+    <div className="grid h-full grid-rows-2 gap-3 md:grid-cols-2 md:grid-rows-[minmax(0,1fr)]">
+      <section className={`${panel} flex min-h-0 flex-col overflow-hidden`}>
         <RichEditor
           initialMarkdown={initial}
           onMarkdownChange={onEditorChange}
           onReady={(e) => (editorRef.current = e)}
         />
       </section>
-      <section className={`${panel} flex min-h-[70vh] flex-col`}>
+      <section className={`${panel} flex min-h-0 flex-col overflow-hidden`}>
         <div className="flex items-center justify-between gap-2 border-b border-zinc-200 p-2 dark:border-zinc-800">
           <span className="px-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">Markdown output</span>
           <div className="flex gap-2">
@@ -64,7 +64,7 @@ function EditorInner({ id, initial }: { id?: string; initial: string }) {
           onChange={(e) => setDraft(e.target.value)}
           spellCheck={false}
           placeholder="Markdown generated from the editor appears here. You can also paste markdown and click Apply."
-          className="min-h-[60vh] flex-1 resize-none bg-transparent p-4 font-mono text-sm outline-none"
+          className="min-h-0 flex-1 resize-none overflow-auto bg-transparent p-4 font-mono text-sm outline-none"
         />
       </section>
     </div>
