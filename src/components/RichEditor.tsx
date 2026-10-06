@@ -2,6 +2,7 @@ import { Markdown } from '@tiptap/markdown'
 import { EditorContent, useEditor, useEditorState, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import type { ReactNode } from 'react'
+import { column } from './ui'
 
 function Tool({ active, onClick, title, children }: { active?: boolean; onClick: () => void; title: string; children: ReactNode }) {
   return (
@@ -63,20 +64,23 @@ function Toolbar({ editor }: { editor: Editor }) {
 export function RichEditor({
   initialMarkdown,
   onMarkdownChange,
-  onReady,
+  onParsed,
 }: {
   initialMarkdown: string
   onMarkdownChange: (md: string) => void
-  onReady: (editor: Editor) => void
+  // The markdown as the editor understands it, reported once on mount. Anything the
+  // schema can't represent is already missing from it, which is how the caller knows
+  // typing here would drop something.
+  onParsed?: (asUnderstood: string) => void
 }) {
   const editor = useEditor({
     extensions: [StarterKit, Markdown],
     content: initialMarkdown,
     contentType: 'markdown',
     editorProps: {
-      attributes: { class: 'tiptap prose prose-zinc max-w-none p-6 dark:prose-invert' },
+      attributes: { class: `tiptap prose prose-zinc ${column} py-6 dark:prose-invert` },
     },
-    onCreate: ({ editor }) => onReady(editor),
+    onCreate: ({ editor }) => onParsed?.(editor.getMarkdown()),
     onUpdate: ({ editor }) => onMarkdownChange(editor.getMarkdown()),
   })
 
