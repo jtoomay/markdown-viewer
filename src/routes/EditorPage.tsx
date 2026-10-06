@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 import { RichEditor } from '../components/RichEditor'
 import { Button, panel } from '../components/ui'
 import { useDocument, useSaveDocument } from '../hooks/useDocuments'
+import { useOpenReader } from '../hooks/useOpenReader'
 import { editorRoute } from '../router'
 
 export function EditorPage() {
@@ -18,7 +19,9 @@ function EditorInner({ id, initial }: { id?: string; initial: string }) {
   const [markdown, setMarkdown] = useState(initial)
   const [draft, setDraft] = useState(initial)
   const [copied, setCopied] = useState(false)
+  const [saved, setSaved] = useState(false)
   const save = useSaveDocument()
+  const reader = useOpenReader()
 
   const onEditorChange = (md: string) => {
     setMarkdown(md)
@@ -31,9 +34,21 @@ function EditorInner({ id, initial }: { id?: string; initial: string }) {
     setTimeout(() => setCopied(false), 1500)
   }
 
+  // Keep the url pointing at the document we just wrote to localStorage.
+  const syncId = (newId: string) => {
+    if (newId !== id) navigate({ search: { doc: newId }, replace: true })
+  }
+
   const onSave = async () => {
-    const saved = await save.mutateAsync({ id, markdown })
-    if (saved.id !== id) navigate({ search: { doc: saved.id }, replace: true })
+    const doc = await save.mutateAsync({ id, markdown })
+    syncId(doc.id)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 1500)
+  }
+
+  const onOpenFullscreen = async () => {
+    const doc = await reader.open({ id, markdown })
+    syncId(doc.id)
   }
 
   const applyDraft = () => {
@@ -55,7 +70,16 @@ function EditorInner({ id, initial }: { id?: string; initial: string }) {
           <span className="px-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">Markdown output</span>
           <div className="flex gap-2">
             {draft !== markdown && <Button onClick={applyDraft}>Apply to editor</Button>}
-            <Button onClick={onSave} disabled={!markdown.trim()}>Save</Button>
+            <Button
+              onClick={onOpenFullscreen}
+              disabled={!markdown.trim() || reader.isPending}
+              title="Saves the document, then opens it full width in a new tab"
+            >
+              ⛶ Full screen ↗
+            </Button>
+            <Button onClick={onSave} disabled={!markdown.trim() || save.isPending}>
+              {saved ? 'Saved ✓' : 'Save'}
+            </Button>
             <Button variant="primary" onClick={copy}>{copied ? 'Copied ✓' : 'Copy markdown'}</Button>
           </div>
         </div>

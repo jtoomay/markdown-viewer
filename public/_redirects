@@ -1,0 +1,3 @@
+# SPA fallback: unmatched paths serve index.html so client-side routes
+# (/read, /editor) work on direct navigation, refresh, and new tabs.
+/*    /index.html   200
