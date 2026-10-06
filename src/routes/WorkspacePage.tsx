@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { MarkdownPreview } from '../components/MarkdownPreview'
 import { RichEditor } from '../components/RichEditor'
-import { Button, column, panel } from '../components/ui'
+import { Button, panel } from '../components/ui'
 import { useDocument, useSaveDocument } from '../hooks/useDocuments'
 import { useOpenReader } from '../hooks/useOpenReader'
 import { workspaceRoute } from '../router'
@@ -128,7 +128,7 @@ function Workspace({
             onChange={(e) => setMarkdown(e.target.value)}
             spellCheck={false}
             placeholder="Paste markdown here…"
-            className={`${column} min-h-0 flex-1 resize-none overflow-auto bg-transparent py-6 font-mono text-sm outline-none`}
+            className="min-h-0 w-full flex-1 resize-none overflow-auto bg-transparent px-4 py-6 font-mono text-sm outline-none"
           />
         )}
         {mode === 'markdown' && (
