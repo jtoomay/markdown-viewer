@@ -9,6 +9,7 @@ import { useTheme } from '../theme/context'
 import { account, storage } from '../lib/appwrite'
 import { AVATARS_BUCKET_ID } from '../lib/avatar'
 import { deleteAccountAndData } from '../lib/deleteAccount'
+import { squareAvatar } from '../lib/image'
 import { prefsStore, type EditorMode, type ThemeMode } from '../lib/prefs'
 import { Permission, Role } from 'appwrite'
 
@@ -112,10 +113,13 @@ function ProfileCard() {
     setNotice(null)
     const previous = user.prefs?.avatarFileId
     try {
+      // Cropped and scaled here: the stored file is what every page load
+      // downloads, since previews are a paid feature.
+      const prepared = await squareAvatar(file)
       const created = await storage.createFile({
         bucketId: AVATARS_BUCKET_ID,
         fileId: ID.unique(),
-        file,
+        file: prepared,
         // Public read: the preview URL is fetched by the browser without the
         // SDK's auth headers, so an owner-only file would not render.
         permissions: [

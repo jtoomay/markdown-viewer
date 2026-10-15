@@ -83,11 +83,15 @@ holds only the two that are genuinely ours.
 The host must also have a **Web platform** registered for its hostname, or the browser blocks every
 request with CORS. `localhost` is matched on any port.
 
-Avatars use `getFileView` rather than `getFilePreview`. Previews are server-side image
-transformations, which Appwrite Cloud blocks below its paid plans — the endpoint answers
-`storage_image_transformations_blocked` and the image fails to load. The original file is served
-instead and the browser does the sizing, bounded by the bucket's 2 MB cap. On a paid plan,
-switching `src/lib/avatar.ts` back to `getFilePreview` gets server-side thumbnails.
+Avatars are resized in the browser before upload (`src/lib/image.ts`) and read back with
+`getFileView`, never `getFilePreview`. Previews are server-side image transformations, which
+Appwrite Cloud blocks below its paid plans — that endpoint answers
+`storage_image_transformations_blocked` and the image simply fails to load.
+
+So the upload itself is the thumbnail: centre-cropped square, at most 512px, re-encoded as WebP
+with a JPEG fallback, honouring EXIF orientation. A 1600×900 PNG goes in at 144 kB and is stored
+at about 4 kB, which is what every page load then fetches. Animated GIFs lose their animation,
+and an image that cannot be decoded is uploaded unchanged rather than refused.
 
 ### Closing an account
 
