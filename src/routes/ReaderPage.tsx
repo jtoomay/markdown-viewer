@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { useAuth } from '../auth/context'
 import { MarkdownPreview } from '../components/MarkdownPreview'
 import { Button } from '../components/ui'
 import { useDocument } from '../hooks/useDocuments'
@@ -7,6 +8,7 @@ import { readerRoute } from '../router'
 
 export function ReaderPage() {
   const { doc: docId } = readerRoute.useSearch()
+  const { user, loading } = useAuth()
   const { data: doc } = useDocument(docId)
   const [fullscreen, setFullscreen] = useState(false)
 
@@ -30,9 +32,14 @@ export function ReaderPage() {
   }
 
   if (!docId) return <Empty>No document selected.</Empty>
-  // useDocument resolves to null when the id isn't in localStorage, undefined while loading.
+  // This tab boots as its own app instance, so wait for the session before
+  // deciding whether the document is missing or simply unreadable yet.
+  if (loading) return null
+  if (!user) return <Empty>Sign in to read this document.</Empty>
+  // useDocument resolves to null when the id is missing or owned by someone
+  // else, and undefined while the request is in flight.
   if (doc === undefined) return null
-  if (doc === null) return <Empty>That document isn’t saved in this browser.</Empty>
+  if (doc === null) return <Empty>That document isn’t in your library.</Empty>
 
   return (
     <div className="flex min-h-screen flex-col">

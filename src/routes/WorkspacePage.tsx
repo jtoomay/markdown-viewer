@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
+import { useAuth } from '../auth/context'
 import { MarkdownPreview } from '../components/MarkdownPreview'
 import { RichEditor } from '../components/RichEditor'
 import { Button, panel } from '../components/ui'
 import { useDocument, useSaveDocument } from '../hooks/useDocuments'
 import { useOpenReader } from '../hooks/useOpenReader'
+import { useTheme } from '../theme/context'
 import { workspaceRoute } from '../router'
 
 const MODES = [
@@ -29,13 +31,17 @@ const segment = (active: boolean) =>
 export function WorkspacePage() {
   const { doc: docId } = workspaceRoute.useSearch()
   const { data: doc } = useDocument(docId)
+  const { defaultMode } = useTheme()
   // Mode sits above the key boundary below, so switching documents keeps the current view.
-  const [mode, setMode] = useState<Mode>('text')
+  const [mode, setMode] = useState<Mode | null>(null)
+  // Until the account's prefs arrive, follow the saved default rather than
+  // locking in 'text' on the first render.
+  const active = mode ?? defaultMode
 
   if (docId && !doc) return null
   // Re-mount when switching documents so the markdown resets with it.
   return (
-    <Workspace key={docId ?? 'new'} id={docId} initial={doc?.markdown ?? ''} mode={mode} onMode={setMode} />
+    <Workspace key={docId ?? 'new'} id={docId} initial={doc?.markdown ?? ''} mode={active} onMode={setMode} />
   )
 }
 
@@ -58,6 +64,7 @@ function Workspace({
   const [rewrites, setRewrites] = useState(false)
   const save = useSaveDocument()
   const reader = useOpenReader()
+  const { user, promptSignIn } = useAuth()
   const empty = !markdown.trim()
 
   // Carried over from the old Render button, which the mode switch replaced.
@@ -71,12 +78,14 @@ function Workspace({
     return () => window.removeEventListener('keydown', onKey)
   }, [mode, onMode])
 
-  // Keep the url pointing at the document we just wrote to localStorage.
+  // Keep the url pointing at the document we just saved.
   const syncId = (newId: string) => {
     if (newId !== id) navigate({ search: { doc: newId }, replace: true })
   }
 
   const onSave = async () => {
+    // Signing in happens in a dialog, so whatever is typed here survives it.
+    if (!user) return promptSignIn()
     const doc = await save.mutateAsync({ id, markdown })
     syncId(doc.id)
     setSaved(true)
@@ -90,6 +99,8 @@ function Workspace({
   }
 
   const onOpenReader = async () => {
+    // The reader tab loads the document by id, so it has to be saved first.
+    if (!user) return promptSignIn()
     const doc = await reader.open({ id, markdown })
     syncId(doc.id)
   }
@@ -105,12 +116,21 @@ function Workspace({
           <Button
             onClick={onOpenReader}
             disabled={empty || reader.isPending}
-            title="Saves the document, then opens it full width in a new tab"
+            title={
+              user
+                ? 'Saves the document, then opens it full width in a new tab'
+                : 'Sign in to open the full-screen reader'
+            }
           >
             ⛶ Full screen ↗
           </Button>
-          <Button variant="primary" onClick={onSave} disabled={empty || save.isPending}>
-            {saved ? 'Saved ✓' : 'Save'}
+          <Button
+            variant="primary"
+            onClick={onSave}
+            disabled={empty || save.isPending}
+            title={user ? undefined : 'Sign in to save'}
+          >
+            {saved ? 'Saved ✓' : user ? 'Save' : 'Sign in to save'}
           </Button>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { usePopover } from '../hooks/usePopover'
-import type { ThemeMode } from '../lib/storage'
+import type { ThemeMode } from '../lib/prefs'
 
 function Icon({ mode }: { mode: ThemeMode }) {
   const common = {

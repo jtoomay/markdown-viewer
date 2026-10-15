@@ -7,8 +7,8 @@ export function readerUrl(id: string) {
 /**
  * Opens the full-screen reader in a new browser tab.
  *
- * The document is saved to localStorage first: that save is how the new tab
- * receives the markdown, since it boots as a fresh app instance.
+ * The document is saved first: that save is how the new tab receives the
+ * markdown, since it boots as a fresh app instance and loads it by id.
  */
 export function useOpenReader() {
   const save = useSaveDocument()

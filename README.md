@@ -28,13 +28,80 @@ Task list items (`- [ ] thing`) are checkable in Markdown mode: ticking one rewr
 item's position rather than by counting checkboxes, so a `- [ ]` inside a fenced code
 block can't send the toggle to the wrong line.
 
-Documents are saved to `localStorage` and listed in the History drawer on the left edge.
-`⛶ Full screen ↗` saves and opens the document chrome-free at `/read?doc=<id>` in a new tab.
+## Accounts
+
+The editor works signed out — type, preview, switch modes. **Saving requires an account**, and
+everything saved belongs to it: documents, theme, accent, and the default view. Sign-in happens in
+a dialog rather than on its own page, so whatever you have typed survives it.
+
+Signed out, there is nowhere to persist to, so a reload starts fresh. The app keeps nothing of its
+own in `localStorage`; the only thing stored there is the Appwrite session, which the SDK writes
+under `cookieFallback` whenever its session cookie would be third-party — the case on `localhost`
+and on any domain other than `*.cloud.appwrite.io`. Attaching a custom domain makes that cookie
+first-party and removes even that.
+
+Documents are listed in the History drawer, opened from the hamburger in the header.
+`⛶ Full screen ↗` saves and opens the document chrome-free at `/read?doc=<id>` in a new tab — that
+tab boots as its own app instance and reads the document by id, so it needs the session too.
+
+## Backend
+
+[Appwrite Cloud](https://cloud.appwrite.io). Client config lives in `.env.local` — copy
+`.env.example` and fill it in. Every value there is public and ships in the browser bundle; a
+server API key must never go in a `VITE_`-prefixed variable.
+
+```sh
+VITE_APPWRITE_ENDPOINT=https://<REGION>.cloud.appwrite.io/v1
+VITE_APPWRITE_PROJECT_ID=
+VITE_APPWRITE_DATABASE_ID=markdown-viewer
+VITE_APPWRITE_TABLE_DOCUMENTS=documents
+VITE_APPWRITE_BUCKET_AVATARS=avatars
+```
+
+The schema is in `appwrite.config.json` and can be recreated with the
+[Appwrite CLI](https://appwrite.io/docs/tooling/command-line/installation):
+
+```sh
+npm install -g appwrite-cli
+appwrite login
+appwrite client --project-id <PROJECT_ID>
+appwrite push tables --all --force
+appwrite push buckets --all --force
+```
+
+Two resources, both relying on Appwrite's per-row and per-file permissions rather than a
+`userId` filter in application code:
+
+| Resource | Shape |
+| --- | --- |
+| Table `documents` | `title`, `markdown`; row security on, `create("users")`. Each row is written with read/update/delete for its owner only, so `listRows` returns one account's documents and nothing else. |
+| Bucket `avatars` | 2 MB, images only, file security on. Avatar files are uploaded with **public read**, because the file URL is fetched by the browser without the SDK's auth headers. |
+
+Appwrite's built-in `$id`, `$createdAt` and `$updatedAt` stand in for three columns, so the table
+holds only the two that are genuinely ours.
+
+The host must also have a **Web platform** registered for its hostname, or the browser blocks every
+request with CORS. `localhost` is matched on any port.
+
+Avatars use `getFileView` rather than `getFilePreview`. Previews are server-side image
+transformations, which Appwrite Cloud blocks below its paid plans — the endpoint answers
+`storage_image_transformations_blocked` and the image fails to load. The original file is served
+instead and the browser does the sizing, bounded by the bucket's 2 MB cap. On a paid plan,
+switching `src/lib/avatar.ts` back to `getFilePreview` gets server-side thumbnails.
+
+### Closing an account
+
+Profile settings can delete every saved document and close the account. Appwrite has no client API
+for deleting your own user — `account.updateStatus()` blocks it permanently instead — so the
+content is deleted and the user record is left blocked and empty. **A blocked account's email can
+never be used to sign up again.** Removing the record outright needs a server API key, which
+belongs in an Appwrite Function rather than in this bundle.
 
 ## Development
 
 ```sh
 npm install
+cp .env.example .env.local   # then fill in the endpoint and project id
 npm run dev     # vite
 npm run build   # tsc -b && vite build
 npm run lint    # oxlint

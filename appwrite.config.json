@@ -1,0 +1,65 @@
+{
+    "projectId": "6ad025f10004cb2e283f",
+    "endpoint": "https://nyc.cloud.appwrite.io/v1",
+    "tablesDB": [
+        {
+            "$id": "markdown-viewer",
+            "name": "Markdown Viewer",
+            "enabled": true
+        }
+    ],
+    "tables": [
+        {
+            "$id": "documents",
+            "$permissions": [
+                "create(\"users\")"
+            ],
+            "databaseId": "markdown-viewer",
+            "name": "Documents",
+            "enabled": true,
+            "rowSecurity": true,
+            "columns": [
+                {
+                    "key": "title",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "markdown",
+                    "type": "mediumtext",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                }
+            ],
+            "indexes": []
+        }
+    ],
+    "buckets": [
+        {
+            "$id": "avatars",
+            "$permissions": [
+                "create(\"users\")"
+            ],
+            "fileSecurity": true,
+            "name": "Avatars",
+            "enabled": true,
+            "maximumFileSize": 2097152,
+            "allowedFileExtensions": [
+                "png",
+                "jpg",
+                "jpeg",
+                "gif",
+                "webp"
+            ],
+            "compression": "gzip",
+            "encryption": true,
+            "antivirus": true
+        }
+    ]
+}

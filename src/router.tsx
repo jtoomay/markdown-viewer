@@ -1,6 +1,7 @@
 import { createRootRoute, createRoute, createRouter, Outlet, redirect } from '@tanstack/react-router'
 import { Layout } from './components/Layout'
 import { ReaderPage } from './routes/ReaderPage'
+import { SettingsPage } from './routes/SettingsPage'
 import { WorkspacePage } from './routes/WorkspacePage'
 
 interface DocSearch {
@@ -28,6 +29,12 @@ export const workspaceRoute = createRoute({
   component: WorkspacePage,
 })
 
+export const settingsRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/settings',
+  component: SettingsPage,
+})
+
 // The editor is now a mode of the workspace rather than its own page.
 // Kept as a redirect so existing links and bookmarks still land somewhere.
 const editorRedirectRoute = createRoute({
@@ -47,7 +54,7 @@ export const readerRoute = createRoute({
 })
 
 const routeTree = rootRoute.addChildren([
-  appRoute.addChildren([workspaceRoute, editorRedirectRoute]),
+  appRoute.addChildren([workspaceRoute, settingsRoute, editorRedirectRoute]),
   readerRoute,
 ])
 
